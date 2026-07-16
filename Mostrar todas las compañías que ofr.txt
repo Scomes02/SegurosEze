@@ -1,0 +1,120 @@
+Mostrar todas las compañías que ofrece
+	Cada cuadro de la compañía debe de poder abrirse, ya sea como ventana emergente u otra pagina y mostrar todo lo que ofrece
+Cotizaciones:
+	Debe permitirse poder pedir cotización de sus productos, para poder hacerse debe de mostrar un formulario al tocar "cotizar" donde se pida:
+		Ejemplo: Auto, Color, año, Marca, GNC/Gasoil/Nafta, cuit/cuil, empresarial o personal, código postal, patente, tarjeta verde, etc.
+			Moto, combustible, año, marca, empresarial o personal,...
+	Todos los datos cargados en los formularios deben ser enviados al wsp del productor, en el mismo formato.
+Opciones para contactarse:
+	Wsp-Correo:baos.ezequiel@gmail.com-Telefono
+Contestaciones rápidas en el bot, contestaciones predeterminadas de consultas frecuentes que suelen hacerse en los brokers de seguros.
+Matricula:
+	Agregarle al footer como en la imagen, Logo del productor|nombre del productor y su matricula|link a www.argentina.gob.ar/ssn|y una redireccion directa a ssn con su logo de ssn
+
+
+Agregar:
+	ART:
+		Nombre y apellido completo o razon social
+		Actividad que desarrolla
+		nomina del personal
+
+ 	Asistencia al viajero:
+		Nombre y apellido completo
+		Edad pasajero
+		Domicilio
+		cuit/dni
+		fecha nacimiento
+		Telefono de contacto (tercero)
+		mail
+		Destino
+		fecha de partida
+		fecha de regreso
+
+
+	Seguro de retiro:
+		Nombre apellido
+		Cuit o dni
+		correo
+		Telefono
+		Fecha nacimiento
+		Domicilio
+		Código postal
+
+	Datos hogar:
+		Material o mixta
+		mm2
+		alquiler o propietario
+		domicilio del lugar
+
+	Seguro de praxis:
+		Nombre apellido
+		Cuit o dni
+		correo
+		Telefono
+		Profesion
+		Nro matricula
+		Fecha desde que ejerce
+		Credencial otorgada por
+		años de experiencia
+		Jefe de equipo si/no
+
+Modificar:
+	Datos de formulario:
+	Auto: 
+		Nombre apellido
+		Cuit o dni
+		correo
+		Telefono
+		Fecha nacimiento
+		Domicilio
+		Código postal
+		correo electronico/ e-mail
+		Forma de pago cuponera o credito/debito
+		Gnc?.si. no
+		Año del vehiculo
+		Tarjeta verde o titulo
+	(mail y celular, ambos obligatorios
+		marca y modelo no, si pedir tarjeta verde o titulo
+		Solamente pedir si es gnc o no)
+	Garantia de alquiler es Seguros de casusion puede ser alquiler u obra
+	Seguro de vida:
+		sacar fumador	
+	Integral de comercio:
+		Sacar alarma
+	Bicicleta:
+		Ubicacion de riesgo, agregar foto factura
+
+Compañias:
+ Federacion Patronal
+ Cooperacion seguros
+ trinfuos seguros
+ Rivadavia
+ Woranz
+ Galicia Seguros
+ Mercantil andina
+ San cristobal retiro
+ 
+ Chat bot
+	Siniestro:
+		fecha de Siniestro
+		hora
+		Lugar del hecho (altura, localidad, cod postal, provincia)
+		Intervino policia/transito
+		Relato del hecho
+		fotos del Siniestro
+		daños causados de tu vehiculo
+		tarjeta verde y carnet de conducir
+		datos del tercero (patente, marca, modelo y año del vehiculo, compañia de seguro y carnet de conducir y daños al vehiculo)
+	Pedir auxilio/Grua
+		📲 Descargá la app de tu compañía para tu documentación.
+
+		📞 Teléfonos:
+
+		Triunfo Seguros: 0810-666-0302 | 
+
+		Rivadavia Seguros: 0800-666-6789 | 
+
+		Federación Patronal: 0810-222-5588 | https://online.fedpat.com.ar/autogestion/ui#/login para documentación cel 22 14290-200
+
+	Documentacion:
+		Entra a la aplicacion de tu compañia o descargala de tu mail.

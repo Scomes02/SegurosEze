@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ricardo Ezequiel Baños - Productor Asesor de Seguros. Más de 13 años brindando la mejor cobertura y tranquilidad para vos, tu familia y tu patrimonio. Cotizá online hoy mismo.">
+    <title>Ezequiel Baños | Productor Asesor de Seguros</title>
+    <link rel="icon" href="assets/img/Logo.png">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-logo-text">
+                <img src="assets/img/Logo.png" alt="Ezequiel Baños Logo" class="logo-img">
+                <span class="logo-bold">EZEQUIEL BAÑOS</span>
+                <span class="logo-sub">Productor Asesor de Seguros</span>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#nosotros">Trayectoria</a></li>
+                <li><a href="#seguros">Coberturas</a></li>
+                <li><a href="#aseguradoras">Compañías</a></li>
+            </ul>
+            <a href="#seguros" class="btn-primary nav-btn">Cotizar ahora</a>
+
+            <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <header id="inicio" class="hero">
+        <div class="ssn-badge-top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shield-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Productor Asesor de Seguros - M.N. 83382
+        </div>
+        <div class="container">
+            <h1>Tranquilidad para vos y tu patrimonio</h1>
+            <p>Comparamos entre las mejores aseguradoras del país para ofrecerte la cobertura ideal al mejor precio. Tu seguridad y respaldo permanente son mi prioridad absoluta.</p>
+            <div class="hero-actions">
+                <a href="#seguros" class="btn-primary">Ver Coberturas</a>
+                <a href="#nosotros" class="btn-outline">Conoceme</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="nosotros" class="nosotros container section-padding">
+        <div class="nosotros-content">
+            <h2>Asesoramiento Humano y Profesional</h2>
+            <p>Soy <strong>Ricardo Ezequiel Baños</strong>, Productor Asesor de Seguros (PAS) enfocado en simplificar el resguardo de tus bienes e inversiones. Brindo soluciones transparentes y a medida para proteger lo que tanto te costó conseguir.</p>
+            <p>No represento a una sola corporación; <strong>trabajo exclusivamente para defender tus intereses</strong>. Analizo detalladamente tu perfil y riesgos potenciales para estructurar pólizas óptimas que equilibren precio y cobertura. Mi trayectoria en el mercado asegurador argentino es tu mayor respaldo.</p>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>+13</h3>
+                    <p>Años de experiencia</p>
+                </div>
+                <div class="stat-item">
+                    <h3>Líderes</h3>
+                    <p>Compañías asociadas</p>
+                </div>
+                <div class="stat-item">
+                    <h3>8 a 16</h3>
+                    <p>Lunes a Viernes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="seguros" class="seguros section-padding bg-light">
+        <div class="container">
+            <h2 class="text-center">Nuestras Coberturas</h2>
+            <p class="text-center subtitle">Soluciones integrales diseñadas para individuos, comercios y empresas.</p>
+
+            <div class="grid-seguros">
+                <div class="card">
+                    <h3>Vehículos y Prendados</h3>
+                    <p>Coberturas de Responsabilidad Civil, Terceros Completos y Todo Riesgo con franquicia para vehículos particulares y comerciales. Gestión de planes de ahorro vigentes.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="auto">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Motos</h3>
+                    <p>Seguros contra robo, incendio y destrucción total. Responsabilidad civil para que circules con total tranquilidad en tu día a día.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="moto">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Hogar</h3>
+                    <p>Protección contra incendio de edificio y contenido, robo de bienes, daños por agua y responsabilidad civil por hechos privados.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="hogar">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Seguros de Caución</h3>
+                    <p>Accedé de forma ágil a las mejores garantías de caución, ya sea para alquiler de propiedades o ejecución de obras.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="caucion">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Riesgos del Trabajo (ART)</h3>
+                    <p>Protección obligatoria y completa para la nómina de tu empresa o negocio frente a accidentes laborales o enfermedades profesionales.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="art">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Mala Praxis Profesional</h3>
+                    <p>Seguro de responsabilidad civil profesional diseñado para proteger tu patrimonio ante reclamos por errores u omisiones en tu ejercicio.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="praxis">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Seguros de Retiro</h3>
+                    <p>Planificá tu futuro financiero hoy. Capitalización con rentabilidad garantizada para mantener tu nivel de vida a largo plazo.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="retiro">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Asistencia al Viajero</h3>
+                    <p>Viajá con tranquilidad. Cobertura médica internacional, pérdida de equipaje y asistencia legal en cualquier parte del mundo.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="viajero">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Accidentes Personales</h3>
+                    <p>Respaldo económico inmediato ante accidentes en la vía pública o ámbito laboral. Ideal para trabajadores independientes.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="accidentes">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Seguros de Vida</h3>
+                    <p>Garantizá la continuidad y estabilidad económica de tus seres queridos ante cualquier eventualidad imprevista.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="vida">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Integral Comercial</h3>
+                    <p>Blindaje operativo total para tu local o pyme ante incendios, robos de mercaderías, roturas de cristales y reclamos civiles de clientes.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="comercio">Cotizar</button></div>
+                </div>
+
+                <div class="card">
+                    <h3>Bicicletas y Movilidad</h3>
+                    <p>Cobertura integral contra robo y destrucción total por accidentes para bicicletas, monopatines y movilidad urbana.</p>
+                    <div class="card-actions"><button class="btn-primary btn-cotizar" data-seguro="bicicleta">Cotizar</button></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="aseguradoras" class="aseguradoras container section-padding">
+        <h2 class="text-center">Compañías que nos respaldan</h2>
+        <p class="text-center subtitle">Operamos en alianza con las aseguradoras líderes del país. Hacé clic en cada compañía para conocer sus coberturas destacadas.</p>
+        <div class="logos-grid">
+            <div class="logo-item" data-company="federacion"><img src="assets/img/federacion-patronal.png" alt="Federación Patronal"></div>
+            <div class="logo-item" data-company="cooperacion"><img src="assets/img/cooperacion-seguros.png" alt="Cooperación Seguros"></div>
+            <div class="logo-item" data-company="triunfo"><img src="assets/img/triunfo-seguro.png" alt="Triunfo Seguros"></div>
+            <div class="logo-item" data-company="rivadavia"><img src="assets/img/seguro-rivadavia.png" alt="Seguros Rivadavia"></div>
+            <div class="logo-item" data-company="woranz"><img src="assets/img/woranz-seguros.png" alt="Woranz"></div>
+            <div class="logo-item" data-company="galicia"><img src="assets/img/galicia-seguros.png" alt="Galicia Seguros"></div>
+            <div class="logo-item" data-company="mercantil"><img src="assets/img/mercantil-andina.png" alt="Mercantil Andina"></div>
+            <div class="logo-item" data-company="sancristobal"><img src="assets/img/san-cristobal.png" alt="San Cristóbal Retiro"></div>
+        </div>
+    </section>
+
+    <!-- Footer Normativo SSN Rediseñado -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-ssn-container">
+                <div class="ssn-col ssn-brand">
+                    <img src="assets/img/Logo.png" alt="Ezequiel Baños Logo" class="footer-logo-img">
+                    <div class="brand-text">
+                        <strong>EZEQUIEL BAÑOS</strong>
+                        <span>Productor Asesor de Seguros</span>
+                    </div>
+                </div>
+                <div class="ssn-col ssn-matricula">
+                    <strong>Ricardo Ezequiel Baños</strong>
+                    <span>Productor Asesor de Seguros</span>
+                    <span>M.N. 83382</span>
+                </div>
+                <div class="ssn-col ssn-link">
+                    <a href="https://www.argentina.gob.ar/ssn" target="_blank">www.argentina.gob.ar/ssn</a>
+                </div>
+                <div class="ssn-col ssn-logo">
+                    <!-- Referencia al logo oficial de la SSN -->
+                    <a href="https://www.argentina.gob.ar/superintendencia-de-seguros/portal-ciudadano/sujetos-habilitados" target="_blank"><img src="assets/img/SSNSuperintendenciadeSeguros.jpg" alt="Superintendencia de Seguros de la Nación" loading="lazy" decoding="async"></a>
+                </div>
+            </div>
+            <div class="footer-bottom text-center">
+                <p>Email: baos.ezequiel@gmail.com | WhatsApp: +54 9 261 656-4707 | Atención: Lunes a Viernes, 8:00 a 16:00 hs</p>
+                <p>&copy; 2026 Ricardo Ezequiel Baños - Todos los derechos reservados. Matrícula SSN Regulada.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Cotización Dinámica (Con soporte para Archivos) -->
+    <div id="modalCotizacion" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeCotizacion">&times;</span>
+            <h2>Solicitar Presupuesto</h2>
+            <form id="formCotizacion" enctype="multipart/form-data">
+                <input type="hidden" name="tipo_seguro" id="inputTipoSeguro">
+                
+                <!-- Contenedor dinámico según tipo de seguro -->
+                <div id="dynamic-fields" class="dynamic-form-grid"></div>
+
+                <div class="contact-method">
+                    <p>¿Por dónde preferís enviar la cotización?</p>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="metodo_envio" value="whatsapp" checked>
+                            <span class="radio-custom">WhatsApp Directo</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="metodo_envio" value="email">
+                            <span class="radio-custom">Vía Correo Electrónico</span>
+                        </label>
+                    </div>
+                    <small style="display:block; margin-top:10px; color:var(--text-muted); font-size:0.8rem;">*Si elegís WhatsApp, te pediremos que envíes las fotos/archivos adjuntos directamente en el chat una vez abierto.</small>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-primary btn-block">Generar Cotización</button>
+                <p id="formStatus" style="text-align: center; margin-top: 15px; font-weight: 600;"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Compañías (Info) -->
+    <div id="modalCompany" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeCompany">&times;</span>
+            <div id="company-info-content"></div>
+        </div>
+    </div>
+
+    <!-- Chatbot Flotante -->
+    <button id="chatbot-trigger" class="chatbot-float" title="Soporte y Consultas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chat-icon">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </button>
+
+    <div id="chatbot-window" class="chatbot-window hidden">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span class="status-dot"></span> Ezequiel Baños | Soporte
+            </div>
+            <button id="chatbot-close" class="chatbot-close">&times;</button>
+        </div>
+        <div id="chatbot-messages" class="chatbot-body"></div>
+        <div class="chatbot-footer"><small>Derivación oficial 📲 Mat. 83382</small></div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
