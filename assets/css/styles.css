@@ -62,7 +62,7 @@ html { scroll-behavior: smooth; }
 .hero {
     position: relative;
     background: url('../img/Famila.png'), linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 60%, var(--accent-teal) 100%);
-    background-size: contain, cover; background-repeat: no-repeat; background-position: center;
+    background-size: contain, cover; background-repeat: no-repeat; background-position: right center, center;
     color: var(--text-main); padding: 140px 0; text-align: center; border-bottom-left-radius: 60px; border-bottom-right-radius: 60px;
 }
 .ssn-badge-top {
