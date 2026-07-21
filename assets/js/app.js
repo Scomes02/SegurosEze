@@ -73,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeCompany) closeCompany.addEventListener('click', () => modalCompany.style.display = 'none');
 
     // 3. Formularios Dinámicos Estrictos
+    // ✅ CORRECCIÓN APLICADA: 'form' se declara aquí, ANTES de ser utilizado más abajo.
+    const form = document.getElementById('formCotizacion');
+    
     const modalCotizacion = document.getElementById('modalCotizacion');
     const dynamicFields = document.getElementById('dynamic-fields');
     const inputTipoSeguro = document.getElementById('inputTipoSeguro');
@@ -254,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // método "email". Si el cliente elige WhatsApp, los inputs de archivo
     // se deshabilitan y en su lugar se arma un recordatorio de texto con
     // qué adjuntar manualmente en el chat. ===
+    // ✅ AHORA 'form' YA ESTÁ DECLARADO Y NO DARÁ ERROR
     const metodoEnvioRadios = form ? form.querySelectorAll('input[name="metodo_envio"]') : [];
     const metodoEnvioNote = document.getElementById('metodoEnvioNote');
 
@@ -329,7 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. Interceptor de Envío y Procesamiento (EmailJS DUAL-FORMAT + WhatsApp)
-    const form = document.getElementById('formCotizacion');
+    // ✅ CORRECCIÓN APLICADA: Se eliminó la declaración de 'form' de aquí porque ya existe arriba.
+    // const form = document.getElementById('formCotizacion'); 
     const btnSubmit = document.getElementById('btnSubmit');
     const formStatus = document.getElementById('formStatus');
 
