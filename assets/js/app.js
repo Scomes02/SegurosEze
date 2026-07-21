@@ -236,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
             inputTipoSeguro.value = seguro.toUpperCase();
             dynamicFields.innerHTML = formSchemas[seguro] || `<input type="text" name="detalles_riesgo" placeholder="Describa el riesgo" class="full-width" required>`;
             modalCotizacion.style.display = 'flex';
+            // === NUEVO: aplica el estado de los inputs de archivo según el
+            // método de envío que ya esté seleccionado (por defecto WhatsApp) ===
+            applyFileInputsState();
         });
     });
 
@@ -245,6 +248,49 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
         if (e.target === modalCotizacion) modalCotizacion.style.display = 'none';
         if (e.target === modalCompany) modalCompany.style.display = 'none';
+    });
+
+    // === NUEVO: Cloudflare R2 (subida de archivos) solo se usa para el
+    // método "email". Si el cliente elige WhatsApp, los inputs de archivo
+    // se deshabilitan y en su lugar se arma un recordatorio de texto con
+    // qué adjuntar manualmente en el chat. ===
+    const metodoEnvioRadios = form ? form.querySelectorAll('input[name="metodo_envio"]') : [];
+    const metodoEnvioNote = document.getElementById('metodoEnvioNote');
+
+    const NOTE_EMAIL = '*Si elegís email, los archivos se suben automáticamente y su link se incluye en el correo, no hace falta reenviarlos.';
+    const NOTE_WHATSAPP = '📎 Por WhatsApp no se suben archivos: al abrir el chat vas a ver un recordatorio de qué adjuntar manualmente vos mismo.';
+
+    function applyFileInputsState() {
+        const metodoSeleccionado = form.querySelector('input[name="metodo_envio"]:checked');
+        const esWhatsapp = metodoSeleccionado ? metodoSeleccionado.value === 'whatsapp' : true;
+
+        dynamicFields.querySelectorAll('input[type="file"]').forEach(input => {
+            input.disabled = esWhatsapp;
+            if (esWhatsapp) input.value = ''; // limpia cualquier archivo ya elegido
+        });
+
+        if (metodoEnvioNote) {
+            metodoEnvioNote.textContent = esWhatsapp ? NOTE_WHATSAPP : NOTE_EMAIL;
+            metodoEnvioNote.style.color = esWhatsapp ? '#f59e0b' : 'var(--text-muted)';
+        }
+    }
+
+    // Recorre los inputs de archivo del formulario actual y arma una lista
+    // de nombres "amigables" (a partir del <label> que los acompaña) para
+    // recordarle al cliente qué adjuntar manualmente en WhatsApp.
+    function getFileReminders() {
+        const reminders = [];
+        dynamicFields.querySelectorAll('input[type="file"]').forEach(input => {
+            const label = input.parentElement.querySelector('label');
+            let texto = label ? label.textContent : input.name;
+            texto = texto.replace(/\(.*?\)/g, '').replace(':', '').trim();
+            reminders.push(texto);
+        });
+        return reminders;
+    }
+
+    metodoEnvioRadios.forEach(radio => {
+        radio.addEventListener('change', applyFileInputsState);
     });
 
     // === NUEVO: sube un archivo directo a R2 usando una URL firmada ===
@@ -299,35 +345,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tipoSeguro = originalFormData.get('tipo_seguro');
 
-            // === NUEVO: paso 1 - subir todos los archivos a R2 primero ===
-            // Antes de armar el mensaje, subimos cada archivo adjunto y
-            // guardamos su link de descarga. Si algo falla, se corta el
-            // envío para no mandar datos incompletos.
-            const fileEntries = [];
-            for (let [key, value] of originalFormData.entries()) {
-                if (key !== 'metodo_envio' && key !== 'tipo_seguro' && value instanceof File && value.size > 0) {
-                    fileEntries.push([key, value]);
+            // === NUEVO: Cloudflare R2 solo se usa si el método es email.
+            // En WhatsApp los inputs de archivo ya están deshabilitados
+            // (applyFileInputsState), por lo que el navegador ni siquiera
+            // los incluye en el FormData: no hace falta filtrarlos acá. ===
+            const fileLinks = []; // { label, fileName, url } — solo se llena en email
+
+            if (metodoEnvio === 'email') {
+                const fileEntries = [];
+                for (let [key, value] of originalFormData.entries()) {
+                    if (key !== 'metodo_envio' && key !== 'tipo_seguro' && value instanceof File && value.size > 0) {
+                        fileEntries.push([key, value]);
+                    }
                 }
-            }
 
-            const fileLinks = []; // { label, fileName, url }
-            for (let i = 0; i < fileEntries.length; i++) {
-                const [key, file] = fileEntries[i];
-                const cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                for (let i = 0; i < fileEntries.length; i++) {
+                    const [key, file] = fileEntries[i];
+                    const cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-                btnSubmit.textContent = `Subiendo archivo ${i + 1}/${fileEntries.length}...`;
-                formStatus.textContent = `Subiendo "${file.name}"...`;
+                    btnSubmit.textContent = `Subiendo archivo ${i + 1}/${fileEntries.length}...`;
+                    formStatus.textContent = `Subiendo "${file.name}"...`;
 
-                try {
-                    const url = await uploadFileToR2(file);
-                    fileLinks.push({ label: cleanKey, fileName: file.name, url });
-                } catch (err) {
-                    console.error('Error subiendo archivo:', key, err);
-                    formStatus.textContent = `❌ No se pudo subir "${file.name}". Probá de nuevo.`;
-                    formStatus.style.color = '#ef4444';
-                    btnSubmit.textContent = 'Generar Cotización';
-                    btnSubmit.disabled = false;
-                    return; // aborta el envío completo
+                    try {
+                        const url = await uploadFileToR2(file);
+                        fileLinks.push({ label: cleanKey, fileName: file.name, url });
+                    } catch (err) {
+                        console.error('Error subiendo archivo:', key, err);
+                        formStatus.textContent = `❌ No se pudo subir "${file.name}". Probá de nuevo.`;
+                        formStatus.style.color = '#ef4444';
+                        btnSubmit.textContent = 'Generar Cotización';
+                        btnSubmit.disabled = false;
+                        return; // aborta el envío completo
+                    }
                 }
             }
 
@@ -352,36 +401,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // === NUEVO: en vez de "reservado para WhatsApp", ahora van los
-            // links reales de descarga (ya subidos a R2) tanto en el texto
-            // de WhatsApp como en la tabla HTML del email. ===
-            if (hasFiles) {
-                waText += `\n--- ARCHIVOS ADJUNTOS ---\n`;
-                emailHtmlRows += `
-                        <tr>
-                            <td colspan="2" style="padding: 14px 15px; font-weight: 700; color: #0284c7;">Archivos adjuntos</td>
-                        </tr>`;
-
-                fileLinks.forEach(f => {
-                    waText += `📎 *${f.label}:* ${f.url}\n`;
-                    emailHtmlRows += `
-                        <tr>
-                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600; width: 35%;">${f.label}</td>
-                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #0f172a;"><a href="${f.url}" target="_blank">${f.fileName}</a></td>
-                        </tr>`;
-                });
-            }
-
             if (metodoEnvio === 'whatsapp') {
+                // === NUEVO: en WhatsApp no hay links de R2. En su lugar,
+                // se arma un recordatorio con los nombres "amigables" de
+                // cada campo de archivo del formulario actual, para que el
+                // cliente sepa qué adjuntar manualmente en el chat. ===
+                const reminders = getFileReminders();
+                if (reminders.length > 0) {
+                    waText += `\n--- ARCHIVOS A ADJUNTAR EN EL CHAT ---\n`;
+                    reminders.forEach(texto => {
+                        waText += `📎 Agregá: ${texto}\n`;
+                    });
+                }
+
                 const waMessage = `Hola Ezequiel, ` + waText.replace('Cotización solicitada para', 'solicito cotización para');
                 const encodedMsg = encodeURIComponent(waMessage);
                 window.open(`${waBase}?text=${encodedMsg}`, '_blank');
 
-                formStatus.textContent = '✅ Redirigiendo a WhatsApp con tus datos y archivos ya cargados...';
+                formStatus.textContent = reminders.length > 0
+                    ? '✅ Redirigiendo a WhatsApp... recordá adjuntar los archivos indicados en el chat.'
+                    : '✅ Redirigiendo a WhatsApp con tus datos ya cargados...';
                 formStatus.style.color = '#00F29D';
                 resetFormState();
 
             } else {
+                // === NUEVO: en email sí van los links reales de descarga
+                // (ya subidos a R2) dentro de la tabla HTML. ===
+                if (hasFiles) {
+                    emailHtmlRows += `
+                        <tr>
+                            <td colspan="2" style="padding: 14px 15px; font-weight: 700; color: #0284c7;">Archivos adjuntos</td>
+                        </tr>`;
+
+                    fileLinks.forEach(f => {
+                        emailHtmlRows += `
+                        <tr>
+                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600; width: 35%;">${f.label}</td>
+                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #0f172a;"><a href="${f.url}" target="_blank">${f.fileName}</a></td>
+                        </tr>`;
+                    });
+                }
+
                 // Parámetros formateados para inyectar directamente en el template HTML de EmailJS
                 const templateParams = {
                     tipo_seguro: tipoSeguro,
