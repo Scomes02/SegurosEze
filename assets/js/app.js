@@ -1,14 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 0. Configuración de APIs (WhatsApp y EmailJS)
     const waBase = "https://wa.me/5492616564707";
-    
+
     // --- REEMPLAZA ESTOS 2 VALORES RESTANTES CON LOS DE TU CUENTA EMAILJS ---
-    const EMAILJS_PUBLIC_KEY = "kOlsNlbfxU9QZD9Xh"; 
+    const EMAILJS_PUBLIC_KEY = "kOlsNlbfxU9QZD9Xh";
     const EMAILJS_SERVICE_ID = "service_jyurbyz"; // ID extraído de tu configuración
     const EMAILJS_TEMPLATE_ID = "template_doiuzfp";
 
+    // === NUEVO: endpoint de la Netlify Function que firma las URLs de R2 ===
+    const UPLOAD_ENDPOINT = '/.netlify/functions/get-upload-url';
+
     // Inicializar EmailJS
-    if(typeof emailjs !== 'undefined') {
+    if (typeof emailjs !== 'undefined') {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
     } else {
         console.error("No se pudo cargar la librería EmailJS. Revisa tu index.html.");
@@ -73,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCotizacion = document.getElementById('modalCotizacion');
     const dynamicFields = document.getElementById('dynamic-fields');
     const inputTipoSeguro = document.getElementById('inputTipoSeguro');
-    
+
     // Bloque base reutilizable
     const baseFields = `
         <input type="text" name="nombre_y_apellido" placeholder="Nombre y Apellido completo" required>
@@ -238,11 +241,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const closeCotizacion = document.getElementById('closeCotizacion');
     if (closeCotizacion) closeCotizacion.addEventListener('click', () => modalCotizacion.style.display = 'none');
-    
+
     window.addEventListener('click', (e) => {
         if (e.target === modalCotizacion) modalCotizacion.style.display = 'none';
         if (e.target === modalCompany) modalCompany.style.display = 'none';
     });
+
+    // === NUEVO: sube un archivo directo a R2 usando una URL firmada ===
+    // 1) le pide a la Netlify Function una URL de subida (PUT) y una de
+    //    descarga (GET), ambas firmadas y con expiración.
+    // 2) sube el archivo directo a R2 con fetch PUT (nunca pasa por Netlify).
+    // 3) devuelve la URL de descarga para incluirla en WhatsApp/Email.
+    async function uploadFileToR2(file) {
+        const signRes = await fetch(UPLOAD_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type || 'application/octet-stream',
+            }),
+        });
+
+        if (!signRes.ok) {
+            const errBody = await signRes.json().catch(() => ({}));
+            throw new Error(errBody.error || 'No se pudo generar la URL de subida');
+        }
+
+        const { uploadUrl, downloadUrl } = await signRes.json();
+
+        const putRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || 'application/octet-stream' },
+            body: file,
+        });
+
+        if (!putRes.ok) {
+            throw new Error(`Error subiendo "${file.name}" a R2`);
+        }
+
+        return downloadUrl;
+    }
 
     // 4. Interceptor de Envío y Procesamiento (EmailJS DUAL-FORMAT + WhatsApp)
     const form = document.getElementById('formCotizacion');
@@ -253,59 +291,96 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const originalFormData = new FormData(form);
-            const metodoEnvio = originalFormData.get('metodo_envio'); 
+            const metodoEnvio = originalFormData.get('metodo_envio');
 
             btnSubmit.textContent = 'Procesando...';
             btnSubmit.disabled = true;
+            formStatus.style.color = '#475569';
 
             const tipoSeguro = originalFormData.get('tipo_seguro');
 
+            // === NUEVO: paso 1 - subir todos los archivos a R2 primero ===
+            // Antes de armar el mensaje, subimos cada archivo adjunto y
+            // guardamos su link de descarga. Si algo falla, se corta el
+            // envío para no mandar datos incompletos.
+            const fileEntries = [];
+            for (let [key, value] of originalFormData.entries()) {
+                if (key !== 'metodo_envio' && key !== 'tipo_seguro' && value instanceof File && value.size > 0) {
+                    fileEntries.push([key, value]);
+                }
+            }
+
+            const fileLinks = []; // { label, fileName, url }
+            for (let i = 0; i < fileEntries.length; i++) {
+                const [key, file] = fileEntries[i];
+                const cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                btnSubmit.textContent = `Subiendo archivo ${i + 1}/${fileEntries.length}...`;
+                formStatus.textContent = `Subiendo "${file.name}"...`;
+
+                try {
+                    const url = await uploadFileToR2(file);
+                    fileLinks.push({ label: cleanKey, fileName: file.name, url });
+                } catch (err) {
+                    console.error('Error subiendo archivo:', key, err);
+                    formStatus.textContent = `❌ No se pudo subir "${file.name}". Probá de nuevo.`;
+                    formStatus.style.color = '#ef4444';
+                    btnSubmit.textContent = 'Generar Cotización';
+                    btnSubmit.disabled = false;
+                    return; // aborta el envío completo
+                }
+            }
+
+            btnSubmit.textContent = 'Enviando datos...';
+            formStatus.textContent = '';
+
             // Separación de formatos: Uno para WhatsApp (Plano) y otro para Correo (HTML)
             let waText = `Cotización solicitada para seguro de *${tipoSeguro}*.\n\n--- DATOS DEL CLIENTE ---\n`;
-            let emailHtmlRows = ``; 
-            let hasFiles = false;
+            let emailHtmlRows = ``;
+            const hasFiles = fileLinks.length > 0;
 
             for (let [key, value] of originalFormData.entries()) {
-                if (key !== 'metodo_envio' && key !== 'tipo_seguro') {
-                    
+                if (key !== 'metodo_envio' && key !== 'tipo_seguro' && typeof value === 'string' && value.trim() !== '') {
                     let cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-                    if (value instanceof File && value.size > 0) {
-                        hasFiles = true;
-                        // Formato WA
-                        waText += `📎 *[Archivo Adjunto]* El usuario subió: ${cleanKey}\n`;
-                        // Formato HTML Email
-                        emailHtmlRows += `
-                        <tr>
-                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600; width: 35%;">${cleanKey}</td>
-                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">📎 <i>Archivo reservado para envío por WhatsApp</i></td>
-                        </tr>`;
-                    } else if (typeof value === 'string' && value.trim() !== '') {
-                        // Formato WA
-                        waText += `*${cleanKey}:* ${value}\n`;
-                        // Formato HTML Email
-                        emailHtmlRows += `
+                    waText += `*${cleanKey}:* ${value}\n`;
+                    emailHtmlRows += `
                         <tr>
                             <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600; width: 35%;">${cleanKey}</td>
                             <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">${value}</td>
                         </tr>`;
-                    }
                 }
             }
 
-            if (metodoEnvio === 'whatsapp') {
-                if (hasFiles) {
-                    waText += `\n*(A continuación enviaré las fotos/documentos solicitados en el formulario)*`;
-                }
+            // === NUEVO: en vez de "reservado para WhatsApp", ahora van los
+            // links reales de descarga (ya subidos a R2) tanto en el texto
+            // de WhatsApp como en la tabla HTML del email. ===
+            if (hasFiles) {
+                waText += `\n--- ARCHIVOS ADJUNTOS ---\n`;
+                emailHtmlRows += `
+                        <tr>
+                            <td colspan="2" style="padding: 14px 15px; font-weight: 700; color: #0284c7;">Archivos adjuntos</td>
+                        </tr>`;
 
+                fileLinks.forEach(f => {
+                    waText += `📎 *${f.label}:* ${f.url}\n`;
+                    emailHtmlRows += `
+                        <tr>
+                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600; width: 35%;">${f.label}</td>
+                            <td style="padding: 14px 15px; border-bottom: 1px solid #e2e8f0; color: #0f172a;"><a href="${f.url}" target="_blank">${f.fileName}</a></td>
+                        </tr>`;
+                });
+            }
+
+            if (metodoEnvio === 'whatsapp') {
                 const waMessage = `Hola Ezequiel, ` + waText.replace('Cotización solicitada para', 'solicito cotización para');
                 const encodedMsg = encodeURIComponent(waMessage);
                 window.open(`${waBase}?text=${encodedMsg}`, '_blank');
-                
-                formStatus.textContent = '✅ Redirigiendo a WhatsApp... ¡Recordá enviar las fotos adjuntas en el chat!';
+
+                formStatus.textContent = '✅ Redirigiendo a WhatsApp con tus datos y archivos ya cargados...';
                 formStatus.style.color = '#00F29D';
                 resetFormState();
-                
+
             } else {
                 // Parámetros formateados para inyectar directamente en el template HTML de EmailJS
                 const templateParams = {
@@ -315,16 +390,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 try {
-                    const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-                    
-                    if (hasFiles) {
-                        formStatus.textContent = '✅ Datos enviados al correo. Por favor, enviá las fotos por WhatsApp.';
-                        formStatus.style.color = '#f59e0b';
-                    } else {
-                        formStatus.textContent = '✅ Cotización enviada correctamente a tu correo.';
-                        formStatus.style.color = '#00F29D';
-                    }
-                    
+                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+
+                    formStatus.textContent = hasFiles
+                        ? '✅ Cotización y archivos enviados correctamente a tu correo.'
+                        : '✅ Cotización enviada correctamente a tu correo.';
+                    formStatus.style.color = '#00F29D';
+
                 } catch (error) {
                     console.error("Error en EmailJS:", error);
                     formStatus.textContent = '❌ Ocurrió un error en el servidor. Intentá la opción WhatsApp.';
