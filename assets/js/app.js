@@ -73,12 +73,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeCompany) closeCompany.addEventListener('click', () => modalCompany.style.display = 'none');
 
     // 3. Formularios Dinámicos Estrictos
-    // ✅ CORRECCIÓN APLICADA: 'form' se declara aquí, ANTES de ser utilizado más abajo.
+    // ✅ 'form' se declara acá arriba porque más abajo lo usa metodoEnvioRadios
+    // antes de llegar a la sección 4.
     const form = document.getElementById('formCotizacion');
-    
+
     const modalCotizacion = document.getElementById('modalCotizacion');
     const dynamicFields = document.getElementById('dynamic-fields');
     const inputTipoSeguro = document.getElementById('inputTipoSeguro');
+
+    // === NUEVO: convierte el "name" de un campo (ej. "anio_vehiculo") en un
+    // label legible y con tildes correctas (ej. "Año Vehículo"). Antes se
+    // generaba solo con mayúsculas, por lo que "anio" quedaba sin la tilde
+    // de "año". Se usa tanto para el email como para los recordatorios. ===
+    const ACENTOS_CAMPOS = {
+        anio: 'año',
+        anios: 'años',
+        vehiculo: 'vehículo',
+        electronico: 'electrónico',
+        telefono: 'teléfono',
+        codigo: 'código',
+        condicion: 'condición',
+        ocupacion: 'ocupación',
+        caucion: 'caución',
+        ubicacion: 'ubicación',
+        razon: 'razón',
+        profesion: 'profesión',
+        matricula: 'matrícula',
+    };
+
+    function cleanFieldName(key) {
+        return key
+            .split('_')
+            .map(palabra => ACENTOS_CAMPOS[palabra.toLowerCase()] || palabra)
+            .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+            .join(' ');
+    }
 
     // Bloque base reutilizable
     const baseFields = `
@@ -257,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // método "email". Si el cliente elige WhatsApp, los inputs de archivo
     // se deshabilitan y en su lugar se arma un recordatorio de texto con
     // qué adjuntar manualmente en el chat. ===
-    // ✅ AHORA 'form' YA ESTÁ DECLARADO Y NO DARÁ ERROR
     const metodoEnvioRadios = form ? form.querySelectorAll('input[name="metodo_envio"]') : [];
     const metodoEnvioNote = document.getElementById('metodoEnvioNote');
 
@@ -333,8 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. Interceptor de Envío y Procesamiento (EmailJS DUAL-FORMAT + WhatsApp)
-    // ✅ CORRECCIÓN APLICADA: Se eliminó la declaración de 'form' de aquí porque ya existe arriba.
-    // const form = document.getElementById('formCotizacion'); 
+    // 'form' ya está declarado en la sección 3, no se vuelve a declarar acá.
     const btnSubmit = document.getElementById('btnSubmit');
     const formStatus = document.getElementById('formStatus');
 
@@ -366,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 for (let i = 0; i < fileEntries.length; i++) {
                     const [key, file] = fileEntries[i];
-                    const cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    const cleanKey = cleanFieldName(key);
 
                     btnSubmit.textContent = `Subiendo archivo ${i + 1}/${fileEntries.length}...`;
                     formStatus.textContent = `Subiendo "${file.name}"...`;
@@ -395,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let [key, value] of originalFormData.entries()) {
                 if (key !== 'metodo_envio' && key !== 'tipo_seguro' && typeof value === 'string' && value.trim() !== '') {
-                    let cleanKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    let cleanKey = cleanFieldName(key);
 
                     waText += `*${cleanKey}:* ${value}\n`;
                     emailHtmlRows += `
